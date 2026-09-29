@@ -1,6 +1,7 @@
 import codecs
 import os
 import re
+import subprocess
 import webbrowser
 
 import sublime
@@ -95,7 +96,10 @@ class GithubinatorCommand(sublime_plugin.TextCommand):
 
         re_host = re.escape(self.default_host)
 
-        sha, current_branch = self.get_git_status(git_dir)
+        if os.path.isdir(os.path.join(git_dir, "reftable")):
+            sha, current_branch = self.get_git_status_from_cli(folder_name)
+        else:
+            sha, current_branch = self.get_git_status(git_dir)
         if not branch:
             branch = current_branch
 
@@ -194,6 +198,32 @@ class GithubinatorCommand(sublime_plugin.TextCommand):
         branch = ref.replace("refs/heads/", "")
 
         return sha, branch
+
+    def get_git_status_from_cli(self, cwd):
+        """Get the current branch and SHA by running git.
+
+        Repos using the reftable backend store refs in a binary format, so we
+        can't read them from `.git/HEAD` and `.git/refs` directly.
+
+        type: (str) -> (str, Optional[str])
+        """
+        sha = self.run_git(cwd, "rev-parse", "HEAD")
+        try:
+            branch = self.run_git(cwd, "symbolic-ref", "--short", "HEAD")
+        except subprocess.CalledProcessError:
+            # detached head
+            branch = None
+        return sha, branch
+
+    def run_git(self, cwd, *args):
+        startupinfo = None
+        if os.name == "nt":
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        output = subprocess.check_output(
+            ("git",) + args, cwd=cwd, stderr=subprocess.DEVNULL, startupinfo=startupinfo
+        )
+        return output.decode("utf-8").strip()
 
     def get_ref(self, git_dir):
         head_path = os.path.join(git_dir, "HEAD")
