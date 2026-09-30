@@ -20,10 +20,11 @@ The plugin should be picked up automatically. If not, restart Sublime Text.
 
 ## Configuration
 
-The defaults should work for most setups, but if you have a different remote name or default branch, you can configure the remote and default branch in the `Githubinator.sublime-settings` file:
+The defaults should work for most setups, but if you have a different remote name, use GitHub Enterprise or default branch, you can configure remote, host, and default branch in the `Githubinator.sublime-settings` file:
 
     {
       "default_remote": "origin",
+      "default_host": "github.com",
       "default_branch": "master"
     }
 

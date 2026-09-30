@@ -19,6 +19,7 @@ class GithubinatorCommand(sublime_plugin.TextCommand):
     highlighted results on GitHub/Bitbucket.
     """
     DEFAULT_GIT_REMOTE = "origin"
+    DEFAULT_HOST = "github.com"
     DEFAULT_BRANCH = "main"
 
     def load_config(self):
@@ -28,6 +29,7 @@ class GithubinatorCommand(sublime_plugin.TextCommand):
         if not isinstance(self.default_remote, list):
             self.default_remote = [self.default_remote]
 
+        self.default_host = settings.get("default_host") or self.DEFAULT_HOST
         self.default_branch = settings.get("default_branch") or self.DEFAULT_BRANCH
 
     def run(self, edit, copyonly=False, permalink=False, mode="blob", default_branch=False, open_repo=False):
@@ -74,21 +76,21 @@ class GithubinatorCommand(sublime_plugin.TextCommand):
             result = re.match(r"^(?:(\w+)://)?(?:[^@/]+@)?([^/:]+)(?::\d+)?[:/](.+?)(?:\.git)?/?$", url)
             if not result:
                 continue
-            url_scheme, host, repo_path = result.groups()
+            url_scheme, self.default_host, repo_path = result.groups()
             scheme = "http" if url_scheme == "http" else "https"
 
             lines = self.get_selected_line_nums()
 
-            repo_link = scheme + "://%s/%s/" % (host, repo_path)
+            repo_link = scheme + "://%s/%s/" % (self.default_host, repo_path)
 
             if open_repo:
                 full_link = repo_link
             else:
-                if "bitbucket" in host:
+                if "bitbucket" in self.default_host:
                     mode = "src" if mode == "blob" else "annotate"
                     lines = ":".join([str(l) for l in lines])
                     full_link = repo_link + "%s/%s/%s#cl-%s" % (mode, sha, path, lines)
-                elif "gitlab" in host:
+                elif "gitlab" in self.default_host:
                     lines = "-".join("%s" % line for line in lines)
                     full_link = repo_link + "%s/%s/%s#L%s" % (mode, target, path, lines)
                 else:
