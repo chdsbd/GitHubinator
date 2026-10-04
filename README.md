@@ -8,15 +8,11 @@ This will allow you to select text in a Sublime Text file, and see the highlight
 
 ## Installation
 
-If you use [Package Control](http://wbond.net/sublime_packages/package_control), just install it from there. If not:
-
-Clone this repo to your Sublime Text Packages folder (ST3 example shown below):
-
-    cd ~/"Library/Application Support/Sublime Text 3/Packages/"
-    git clone https://github.com/ehamiter/GitHubinator.git
-
-The plugin should be picked up automatically. If not, restart Sublime Text.
-
+```
+  1. Open the Command Palette (⇧⌘P) and run Package Control: Add Repository.
+  2. Paste `https://github.com/chdsbd/GitHubinator`.
+  3. Run `Package Control: Install Package` and pick GitHubinator. If the upstream copy is installed, remove it first.
+```
 
 ## Configuration
 
